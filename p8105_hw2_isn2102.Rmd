@@ -1,0 +1,16 @@
+---
+title: "Homework2"
+author: "Isabel Nelson"
+date: "9/24/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+```
+
+### Problem 1: Read + clean data
+
+
+

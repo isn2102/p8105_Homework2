@@ -12,5 +12,59 @@ library(readxl)
 
 ### Problem 1: Read + clean data
 
+Read in Mr. Trashwheel dataset:   
+```{r import_trash}
+trashwheel_df <- read_xlsx(
+  "./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+  sheet = "Mr. Trash Wheel",
+  range = cell_cols("A:N")) %>% 
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% #this only gets rid of NA values in the dumpster col
+  mutate(
+    sports_balls = round(sports_balls), 
+    sports_balls = as.integer(sports_balls) #can modify the previous variable we just mutated
+  )
+```
+
+Read in precipitation data for 2017 and 2018:   
+```{r import_prec}
+precip2018_df <- read_xlsx(
+  "./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+  sheet = "2018 Precipitation",
+  skip = 1) %>% 
+  janitor::clean_names() %>% 
+  drop_na(month) %>% 
+  mutate(year = 2018) %>% 
+  relocate(year)
+
+precip2017_df <- read_xlsx(
+  "./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+  sheet = "2017 Precipitation",
+  skip = 1) %>% 
+  janitor::clean_names() %>% 
+  drop_na(month) %>% 
+  mutate(year = 2017) %>% 
+  relocate(year)
+```
+
+Combine two precipitation datasets: 
+```{r combine}
+month_df <-
+  tibble(
+    month = 1:12, 
+    month_name = month.name
+  )
+
+precip_df <-
+  bind_rows(precip2017_df, precip2018_df)
+
+left_join(precip_df, month_df, by = "month")
+
+#Extract out variable for the answers to problem 1 to use in paragraph below. 
+```
+
+This dataset has information from the Mr. Trashwheel trash collector in Baltimore, Maryland. When trash enters the harbor, the trashwheel collects it and puts it into a dumpster. The dataset has information on year, month, and trash collected, including some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in the final dataset. Additional data sheets include month precipitation data. 
+
+
 
 

@@ -10,7 +10,7 @@ library(tidyverse)
 library(readxl)
 ```
 
-### Problem 1: Read + clean data
+### Problem 1: Mr. Trashwheel
 
 Read in Mr. Trashwheel dataset:   
 ```{r import_trash}
@@ -59,12 +59,23 @@ precip_df <-
   bind_rows(precip2017_df, precip2018_df)
 
 left_join(precip_df, month_df, by = "month")
-
-#Extract out variable for the answers to problem 1 to use in paragraph below. 
 ```
 
-This dataset has information from the Mr. Trashwheel trash collector in Baltimore, Maryland. When trash enters the harbor, the trashwheel collects it and puts it into a dumpster. The dataset has information on year, month, and trash collected, including some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in the final dataset. Additional data sheets include month precipitation data. 
+Extract out variables to use for the paragraph below - total precipitation and median sports balls in 2017.
 
+```{r key_data}
+# Total precipitation
+precip_2017 <- sum(pull(filter(precip_df, year == 2017), total))
 
+precip_2018 <- sum(pull(filter(precip_df, year == 2018), total))
+  
+# Median number of sports balls in a dumpster in 2017
+med_balls <- median(pull(filter(trashwheel_df, year == 2017), sports_balls))
 
+```
 
+This dataset has information from the Mr. Trashwheel trash collector in Baltimore, Maryland. When trash enters the harbor, the trashwheel collects it and puts it into a dumpster. The dataset has information on year, month, and trash collected, including some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in the final Mr. Trashwheel dataset. It includes variables: `r colnames(trashwheel_df)` and has data from `r min(pull(trashwheel_df, year))` to `r max(pull(trashwheel_df, year))`. The median number of sports balls in a dumpster in 2017 was `r med_balls`. Additional data sheets include month precipitation data. The total precipitation in 2017 was `r precip_2017` inches. The total precipitation in 2018 was `r precip_2018` inches. 
+
+### Problem 2: NYC transit
+
+### Problem 3: FiveThirtyEight

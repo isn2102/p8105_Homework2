@@ -77,5 +77,17 @@ med_balls <- median(pull(filter(trashwheel_df, year == 2017), sports_balls))
 This dataset has information from the Mr. Trashwheel trash collector in Baltimore, Maryland. When trash enters the harbor, the trashwheel collects it and puts it into a dumpster. The dataset has information on year, month, and trash collected, including some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in the final Mr. Trashwheel dataset. It includes variables: `r colnames(trashwheel_df)` and has data from `r min(pull(trashwheel_df, year))` to `r max(pull(trashwheel_df, year))`. The median number of sports balls in a dumpster in 2017 was `r med_balls`. Additional data sheets include month precipitation data. The total precipitation in 2017 was `r precip_2017` inches. The total precipitation in 2018 was `r precip_2018` inches. 
 
 ### Problem 2: NYC transit
+Read in dataset and perform data cleaning steps: clean up names, remove unneeded columns, change type of entry variable. 
+```{r read, message = FALSE}
+subway_df <- read_csv("./Data/NYC_Transit_Subway.csv") %>% 
+  janitor::clean_names() %>% 
+  select(line, station_name, station_latitude, station_longitude,     route1:route11, entry, entrance_type, vending, ada) %>% 
+  {mutate(., entry = (ifelse((pull(., entry) == "YES"), TRUE, FALSE)))} %>% 
+  distinct()
+```
+The NYC transit dataset contains information about subway stations in NYC. Initially the dataset contained variables detailing each entrance and exit location, along with additional details about which subway lines serve the station. After cleaning the names and removing some of the variables, the final dataset contains variables `r colnames(subway_df)`. As part of the data cleaning I changed the entry variable from character to logical, using mutate and ifelse. I also removed duplicate rows because the final dataset does not include details about the specific location of each entryway, so some rows are redundant. After these cleaning steps there are `r nrow(subway_df)` rows and `r ncol(subway_df)` columns. These data are tidy. 
+
+
+
 
 ### Problem 3: FiveThirtyEight

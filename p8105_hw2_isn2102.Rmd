@@ -12,7 +12,7 @@ library(readxl)
 
 ### Problem 1: Mr. Trashwheel
 
-Read in Mr. Trashwheel dataset:   
+**Read in Mr. Trashwheel dataset:**   
 ```{r import_trash}
 trashwheel_df <- read_xlsx(
   "./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
@@ -26,7 +26,7 @@ trashwheel_df <- read_xlsx(
   )
 ```
 
-Read in precipitation data for 2017 and 2018:   
+**Read in precipitation data for 2017 and 2018:**  
 ```{r import_prec}
 precip2018_df <- read_xlsx(
   "./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
@@ -47,7 +47,7 @@ precip2017_df <- read_xlsx(
   relocate(year)
 ```
 
-Combine two precipitation datasets: 
+**Combine two precipitation datasets:** 
 ```{r combine}
 month_df <-
   tibble(
@@ -61,8 +61,7 @@ precip_df <-
 left_join(precip_df, month_df, by = "month")
 ```
 
-Extract out variables to use for the paragraph below - total precipitation and median sports balls in 2017.
-
+**Extract out variables to use for the paragraph below - total precipitation and median sports balls in 2017.**
 ```{r key_data}
 # Total precipitation
 precip_2017 <- sum(pull(filter(precip_df, year == 2017), total))
@@ -77,7 +76,8 @@ med_balls <- median(pull(filter(trashwheel_df, year == 2017), sports_balls))
 This dataset has information from the Mr. Trashwheel trash collector in Baltimore, Maryland. When trash enters the harbor, the trashwheel collects it and puts it into a dumpster. The dataset has information on year, month, and trash collected, including some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in the final Mr. Trashwheel dataset. It includes variables: `r colnames(trashwheel_df)` and has data from `r min(pull(trashwheel_df, year))` to `r max(pull(trashwheel_df, year))`. The median number of sports balls in a dumpster in 2017 was `r med_balls`. Additional data sheets include month precipitation data. The total precipitation in 2017 was `r precip_2017` inches. The total precipitation in 2018 was `r precip_2018` inches. 
 
 ### Problem 2: NYC transit
-Read in dataset and perform data cleaning steps: clean up names, remove unneeded columns, change type of entry variable. 
+
+**Read in dataset and perform data cleaning steps:**  
 ```{r read, message = FALSE}
 subway_df <- read_csv("./Data/NYC_Transit_Subway.csv") %>% 
   janitor::clean_names() %>% 
@@ -86,19 +86,39 @@ subway_df <- read_csv("./Data/NYC_Transit_Subway.csv") %>%
 ```
 The NYC transit dataset contains information about subway stations in NYC. Initially the dataset contained variables detailing each entrance and exit location at every station, along with additional details about which subway lines serve the station. After cleaning the names and removing some of the variables, the final dataset contains variables `r colnames(subway_df)`. As part of the data cleaning I changed the entry variable from character to logical, using mutate and ifelse. After these cleaning steps there are `r nrow(subway_df)` rows representing exits/entrances, and `r ncol(subway_df)` columns. These data are not tidy because the way route is communicated is combining route number and name. 
 
-Answering questions about the dataset: finding distinct stations by line and station name, ada complient stations, and proportion of entrances/exit without vending that allow entry. 
+**Identifying distinct stations, ada complient stations, and proportion of entrances/exit without vending that allow entry:**
 ```{r questions}
-distinct_stations <- distinct(subway_df, line, station_name, .keep_all = TRUE)
-ada_compliant <- nrow(filter(distinct_stations, ada == TRUE))
-vending_df <- subway_df %>% 
+distinct_stations_df <- distinct(subway_df, line, station_name, .keep_all = TRUE)
+ada_compliant_num <- nrow(filter(distinct_stations_df, ada == TRUE))
+no_vending_df <- subway_df %>% 
   filter(vending == "NO") 
-prop_entrance = nrow(filter(vending_df, entry == TRUE)) / nrow(vending_df)
+prop_entrance = round(nrow(filter(no_vending_df, entry == TRUE)) / nrow(no_vending_df), 3)
 ```
 
-1. There are `r nrow(distinct_stations)` distinct stations.  
-2. `r ada_compliant` stations are ADA compliant. 
-3. `r prop_entrance` stations without vending allow entrance.
+1. There are `r nrow(distinct_stations_df)` distinct stations.  
+2. `r ada_compliant_num` stations are ADA compliant. 
+3. `r prop_entrance*100` percent of entrances/exits without vending allow entrance.
 
+**Reformat data so that route number and route name are distinct variables.**
+```{r reformat}
+subway_tidy <-
+  subway_df %>% 
+  mutate_at(vars(route8:route11), as.character) %>% 
+  pivot_longer(
+    route1:route11, 
+    names_to = "route_num", 
+    values_to = "route_name") %>% 
+  drop_na(route_name)
 
+A_stations <-
+  subway_tidy %>% 
+  filter(route_name == "A") %>% 
+  distinct(line, station_name, .keep_all = TRUE)
+
+ADA_A_stations <-
+  A_stations %>% 
+  filter(ada == TRUE)
+```
+There are `r nrow(A_stations)` unique stations serving the A train. Of those stations, `r nrow(ADA_A_stations)` are ADA compliant. 
 
 ### Problem 3: FiveThirtyEight

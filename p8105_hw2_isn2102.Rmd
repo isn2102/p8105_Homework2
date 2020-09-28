@@ -82,11 +82,22 @@ Read in dataset and perform data cleaning steps: clean up names, remove unneeded
 subway_df <- read_csv("./Data/NYC_Transit_Subway.csv") %>% 
   janitor::clean_names() %>% 
   select(line, station_name, station_latitude, station_longitude,     route1:route11, entry, entrance_type, vending, ada) %>% 
-  {mutate(., entry = (ifelse((pull(., entry) == "YES"), TRUE, FALSE)))} %>% 
-  distinct()
+  {mutate(., entry = (ifelse((pull(., entry) == "YES"), TRUE, FALSE)))}
 ```
-The NYC transit dataset contains information about subway stations in NYC. Initially the dataset contained variables detailing each entrance and exit location, along with additional details about which subway lines serve the station. After cleaning the names and removing some of the variables, the final dataset contains variables `r colnames(subway_df)`. As part of the data cleaning I changed the entry variable from character to logical, using mutate and ifelse. I also removed duplicate rows because the final dataset does not include details about the specific location of each entryway, so some rows are redundant. After these cleaning steps there are `r nrow(subway_df)` rows and `r ncol(subway_df)` columns. These data are tidy. 
+The NYC transit dataset contains information about subway stations in NYC. Initially the dataset contained variables detailing each entrance and exit location at every station, along with additional details about which subway lines serve the station. After cleaning the names and removing some of the variables, the final dataset contains variables `r colnames(subway_df)`. As part of the data cleaning I changed the entry variable from character to logical, using mutate and ifelse. After these cleaning steps there are `r nrow(subway_df)` rows representing exits/entrances, and `r ncol(subway_df)` columns. These data are not tidy because the way route is communicated is combining route number and name. 
 
+Answering questions about the dataset: finding distinct stations by line and station name, ada complient stations, and proportion of entrances/exit without vending that allow entry. 
+```{r questions}
+distinct_stations <- distinct(subway_df, line, station_name, .keep_all = TRUE)
+ada_compliant <- nrow(filter(distinct_stations, ada == TRUE))
+vending_df <- subway_df %>% 
+  filter(vending == "NO") 
+prop_entrance = nrow(filter(vending_df, entry == TRUE)) / nrow(vending_df)
+```
+
+1. There are `r nrow(distinct_stations)` distinct stations.  
+2. `r ada_compliant` stations are ADA compliant. 
+3. `r prop_entrance` stations without vending allow entrance.
 
 
 
